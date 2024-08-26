@@ -11,12 +11,32 @@ import io.ktor.server.routing.*
 
 fun Route.userRoutes() {
     route("/users") {
-        get {
+        get({
+                tags = listOf("User API")
+                summary = "Get all users"
+                description = "Retrieve a list of all users."
+                response {
+                    HttpStatusCode.OK to {
+                        body<List<User>> { description = "List of users" }
+                    }
+                }
+        }) {
             val users = UserRepository.getAllUsers()
             call.respond(users)
         }
 
-        get("/{id}"){
+        get("/{id}",{
+            tags = listOf("User API")
+            summary = "Get a user by ID"
+            description = "Retrieve a user by their ID."
+            response {
+                HttpStatusCode.OK to {
+                    body<User> { description = "Retrieved user" }
+                }
+                HttpStatusCode.NotFound to { description = "User not found" }
+                HttpStatusCode.BadRequest to { description = "Invalid user ID" }
+            }
+        }){
             val userId = call.parameters["id"]?.toIntOrNull()
             if (userId == null) {
                 call.respond(HttpStatusCode.BadRequest,"Invalid user ID")
