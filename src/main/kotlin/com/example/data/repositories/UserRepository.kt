@@ -11,8 +11,13 @@ object UserRepository {
         transaction { SchemaUtils.create(Users) }
     }
 
-    fun getAllUsers(): List<User> {
-        return transaction { Users.selectAll().map { toUser(it) } }
+    fun getAllUsers(limit: Int, offset: Int): List<User> {
+        return transaction {
+            Users.selectAll()
+                .orderBy(Users.id, SortOrder.DESC)
+                .limit(limit, offset.toLong())
+                .map { toUser(it) }
+        }
     }
 
     fun getUserById(id: Int): User? {
