@@ -57,4 +57,7 @@ dependencies {
 
     // password encryption
     implementation("org.mindrot:jbcrypt:0.4")
+
+    implementation("io.ktor:ktor-server-auth:2.0.0")
+    implementation("io.ktor:ktor-server-auth-jwt:2.0.0")
 }
