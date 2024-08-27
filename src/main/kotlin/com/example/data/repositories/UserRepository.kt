@@ -2,46 +2,35 @@ package com.example.data.repositories
 
 import com.example.data.models.User
 import com.example.data.models.Users
+import com.example.database.DatabaseFactory.dbQuery
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
+import com.example.data.repositories.UserRepository.getUserById as getUserById1
 
 object UserRepository {
-
-    init {
-        transaction { SchemaUtils.create(Users) }
+    suspend fun getAllUsers(limit: Int, offset: Int): List<User> = dbQuery {
+        Users.selectAll().limit(limit, offset.toLong()).map { toUser(it) }
     }
 
-    fun getAllUsers(limit: Int, offset: Int): List<User> {
-        return transaction {
-            Users.selectAll()
-                .orderBy(Users.id, SortOrder.DESC)
-                .limit(limit, offset.toLong())
-                .map { toUser(it) }
+    suspend fun getUserById(id: Int): User? = dbQuery {
+        Users.select { Users.id eq id }.mapNotNull { toUser(it) }.singleOrNull()
+    }
+
+    suspend fun createUser(name: String, email: String, password: String) = dbQuery {
+        Users.insert {
+            it[Users.name] = name
+            it[Users.email] = email
+            it[Users.password] = password
+        }.resultedValues?.singleOrNull()?.let { toUser(it) }
+    }
+
+    suspend fun updateUser(id: Int, name: String): User? = dbQuery {
+        val update = Users.update({ Users.id eq id }) {
+            it[Users.name] = name
         }
-    }
-
-    fun getUserById(id: Int): User? {
-        return transaction {
-            Users.select { Users.id eq id }.mapNotNull { toUser(it) }.singleOrNull()
-        }
-    }
-
-    fun createUser(name: String): User {
-        return transaction {
-            Users.insert {
-                it[Users.name] = name
-            }.resultedValues?.singleOrNull()?.let { toUser(it) } ?: throw Exception("User not created")
-        }
-    }
-
-    fun updateUser(id: Int, name: String): User? {
-        return transaction {
-            Users.update({ Users.id eq id }) {
-                it[Users.name] = name
-            }
-            getUserById(id) }
+        if (update == 1) Users.select { Users.id eq id }.mapNotNull { toUser(it) }.singleOrNull() else null
     }
 
     private fun toUser(row: ResultRow): User =
-        User(id = row[Users.id].value, name = row[Users.name])
+        User(id = row[Users.id], name = row[Users.name], email = row[Users.email])
 }

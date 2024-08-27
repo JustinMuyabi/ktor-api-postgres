@@ -41,11 +41,20 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-dao:0.42.0")
     implementation("org.jetbrains.exposed:exposed-jdbc:0.42.0")
 
-    // Add PostgreSQL JDBC driver
+    // Add PostgresSQL JDBC driver
     implementation("org.postgresql:postgresql:42.4.0")
 
     testImplementation("io.ktor:ktor-server-test-host-jvm")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
 
     implementation("com.typesafe:config:1.4.1")
+
+    // migration tool
+    implementation("org.flywaydb:flyway-core:6.5.2")
+
+    // database pooling
+    implementation("com.zaxxer:HikariCP:2.7.8")
+
+    // password encryption
+    implementation("org.mindrot:jbcrypt:0.4")
 }
